@@ -1,27 +1,38 @@
 import { useState } from "react";
 const StatisticsLine = (props) => {
   return (
-    <div>
-      {props.text}: {props.rating}
-    </div>
+    <tr>
+      <th> {props.text}</th>
+      <td>
+        {props.rating}
+        {props.word}
+      </td>
+    </tr>
   );
 };
 const Statistics = (props) => {
   return (
     <>
       <h1>Statistics</h1>
-      <StatisticsLine text="good" rating={props.ratings.good} />
-      <StatisticsLine text="neutral" rating={props.ratings.neutral} />
-      <StatisticsLine text="bad" rating={props.ratings.bad} />
-      <StatisticsLine text="total" rating={props.ratings.total} />
-      <StatisticsLine
-        text="average"
-        rating={(props.ratings.good - props.ratings.bad) / props.ratings.total}
-      />
-      <StatisticsLine
-        text="percent positive"
-        rating={props.ratings.good / props.ratings.total}
-      />
+      <table>
+        <tbody>
+          <StatisticsLine text="good" rating={props.ratings.good} />
+          <StatisticsLine text="neutral" rating={props.ratings.neutral} />
+          <StatisticsLine text="bad" rating={props.ratings.bad} />
+          <StatisticsLine text="total" rating={props.ratings.total} />
+          <StatisticsLine
+            text="average"
+            rating={
+              (props.ratings.good - props.ratings.bad) / props.ratings.total
+            }
+          />
+          <StatisticsLine
+            text="percent positive"
+            rating={(props.ratings.good / props.ratings.total) * 100}
+            word="%"
+          />
+        </tbody>
+      </table>
     </>
   );
 };

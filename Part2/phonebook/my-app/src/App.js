@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 const Filter = (props) => {
   return (
@@ -37,9 +38,7 @@ const Persons = (props) => {
 };
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: "Arto Hellas", number: "4223456784" },
-  ]);
+  const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [newFilter, setNewFilter] = useState("");
@@ -86,6 +85,23 @@ const App = () => {
   const addNewFilter = (event) => {
     setNewFilter(event.target.value);
   };
+  useEffect(() => {
+    console.log("effect");
+    axios.get("http://localhost:3001/persons").then((response) => {
+      let clone = persons;
+      console.log("promise fulfilled");
+      response.data.forEach((r) => {
+        console.log(r);
+        const person = {
+          name: r.name,
+          number: r.number,
+        };
+        clone = clone.concat(person);
+      });
+      console.log("RESET", clone);
+      setPersons(clone);
+    });
+  }, []);
   return (
     <div>
       <div>

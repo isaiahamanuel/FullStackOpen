@@ -1,47 +1,42 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-
-const Filter = (props) => {
-  return (
-    <div>
-      filter: <input value={props.val} onChange={props.change} />
-    </div>
-  );
-};
-const PersonForm = (props) => {
-  return (
-    <form onSubmit={props.submit}>
-      <div>
-        name: <input value={props.nameVal} onChange={props.nameChange} />
-        <div>
-          number: <input value={props.numVal} onChange={props.numChange} />
-        </div>
-      </div>
-      <div>
-        <button type="submit">add</button>
-      </div>
-    </form>
-  );
-};
-
-const Persons = (props) => {
-  console.log(props.peopleToShow);
-
-  return props.peopleToShow.map((person) => {
-    return (
-      <div key={person.name}>
-        {" "}
-        {person.name} {person.number}
-      </div>
-    );
-  });
-};
+import Persons from "./Components/Persons";
+import PersonForm from "./Components/PersonForm";
+import Filter from "./Components/Filter";
+import Success from "./Components/Success";
+import Error from "./Components/Error";
+import axiosCalls from "./services/axiosCalls";
+import "./index.css";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [newFilter, setNewFilter] = useState("");
+  const [newSuccess, setNewSuccess] = useState(null);
+  const [newError, setNewError] = useState(null);
+  const deleteUser = (id, name) => {
+    console.log(id);
+    if (window.confirm(`Delete ${name}?`) === false) {
+      return;
+    }
+
+    axiosCalls
+      .deleteBackend(id)
+      .then(() => {
+        const newPeople = persons.filter((person) => {
+          return person.id !== id;
+        });
+        setNewError(`${name} was succesfully deleted`);
+        setPersons(newPeople);
+      })
+      .catch(() => {
+        setNewError(`${name} has already been deleted, please reload`);
+      });
+    setTimeout(() => {
+      setNewError(null);
+    }, 3000);
+  };
   const addNewPerson = (event) => {
     event.preventDefault();
     if (newName === "" || newNumber === "") {
@@ -65,9 +60,15 @@ const App = () => {
       name: newName,
       number: newNumber,
     };
-    setPersons(persons.concat(person));
-    setNewName("");
-    setNewNumber("");
+    axiosCalls.createBackend(person).then((data) => {
+      setPersons(persons.concat(data));
+      setNewName("");
+      setNewNumber("");
+      setNewSuccess(`${data.name} was succesfully added`);
+      setTimeout(() => {
+        setNewSuccess(null);
+      }, 3000);
+    });
   };
   const addNewName = (event) => {
     setNewName(event.target.value);
@@ -86,21 +87,21 @@ const App = () => {
     setNewFilter(event.target.value);
   };
   useEffect(() => {
-    console.log("effect");
     axios.get("http://localhost:3001/persons").then((response) => {
       let clone = persons;
-      console.log("promise fulfilled");
+
       response.data.forEach((r) => {
-        console.log(r);
         const person = {
           name: r.name,
           number: r.number,
+          id: r.id,
         };
         clone = clone.concat(person);
       });
-      console.log("RESET", clone);
+
       setPersons(clone);
     });
+    // eslint-disable-next-line
   }, []);
   return (
     <div>
@@ -115,9 +116,11 @@ const App = () => {
         numChange={addNewNumber}
         submit={addNewPerson}
       />
+      <Success val={newSuccess} />
+      <Error val={newError} />
 
       <h2>Numbers</h2>
-      <Persons peopleToShow={peopleToShow} />
+      <Persons peopleToShow={peopleToShow} click={deleteUser} />
     </div>
   );
 };

@@ -1,4 +1,8 @@
 {
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6"
+  },
   "name": "part3",
   "version": "1.0.0",
   "description": "part3a",
@@ -11,7 +15,8 @@
   "author": "Isaiah Amanuel",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "morgan": "^1.10.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.22"

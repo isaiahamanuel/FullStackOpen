@@ -1,5 +1,8 @@
 const express = require("express");
+const morgan = require("morgan");
 const app = express();
+app.use(express.json());
+app.use(morgan("tiny"));
 
 let persons = [
   {
@@ -43,21 +46,36 @@ app.get("/api/persons/:id", (request, response) => {
   response.json(person);
 });
 
-app.delete("api/person/:id", (request, response) => {
+app.delete("/api/persons/:id", (request, response) => {
   const id = Number(request.params.id);
-  person = persons.filter((p) => {
+  persons = persons.filter((p) => {
     p.id !== id;
   });
-
-  const generateId = () => {
-    return Math.floor(Math.random() * 10000000);
-  };
+  response.status(204).end();
 });
 
-app.post("api/person", (request, response) => {
+const generateId = () => {
+  return Math.floor(Math.random() * 10000000);
+};
+
+app.post("/api/persons", (request, response) => {
   const person = request.body;
-  person.id = generateId;
-  persons.concat(person);
+  if (!person.name || !person.number) {
+    return response.status(400).json({
+      error: "content missing",
+    });
+  }
+  const exists = persons.find((p) => {
+    return p.name === person.name;
+  });
+  if (exists) {
+    return response.status(400).json({
+      error: "user already exists ",
+    });
+  }
+  person.id = generateId();
+  persons = persons.concat(person);
+  console.log(JSON.stringify(person));
   response.json(person);
 });
 
